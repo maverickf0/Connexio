@@ -17,9 +17,10 @@ import { BACKEND_URL } from "@/app/config";
 import { PrimaryButton } from "@/components/buttons/PrimaryButton";
 import { useRouter } from "next/navigation";
 import Input from "@/components/loginComponents/Input";
+import { initialEdges, initialNodes } from "@/components/workflowComponents/utils/Workflow.constants";
   
 
-function useAvailableActionsAndTriggers () {
+export function useAvailableActionsAndTriggers () {
     const [availableActions,setAvailableActions] = useState([]);
     const [availableTriggers, setAvailableTriggers] = useState([]);
 
@@ -40,6 +41,10 @@ function useAvailableActionsAndTriggers () {
 export default function (){
 
     const {availableActions, availableTriggers} = useAvailableActionsAndTriggers();
+
+    const [nodes, setNodes] = useState(initialNodes);
+
+    const [edges, setEdges] = useState(initialEdges)
 
     const [selectedTrigger, setSelectedTrigger] = useState<{
         id:string;
@@ -82,8 +87,18 @@ export default function (){
                 </PrimaryButton>
             </div>
             <div className="w-full min-h-screen bg-gray-200 flex flex-col items-center justify-center">
-            {/* <ZapCanvas name="trigger" index={1}/> */}
-            <div className="flex justify-center w-full">
+            <ZapCanvas index={1} onClick={()=>{
+                    setSelectedModalIndex(null);
+                     }}
+                     setNodes = {setNodes}
+                     setEdges = {setEdges}
+                     nodes = {nodes}
+                     edges = {edges}
+                     setSelectedModalIndex = {setSelectedModalIndex}
+                     selectedActions={selectedActions}
+                     selectedTrigger={selectedTrigger}
+                     />
+            {/* <div className="flex justify-center w-full">
                 <ZapCell onClick={()=>{
                     setSelectedModalIndex(1);
                      }} name= {selectedTrigger? selectedTrigger.name: "Trigger"} index= {1}/>
@@ -96,8 +111,8 @@ export default function (){
                             }} name= {action.availableActionName? action.availableActionName: "Action"} index= {action.index}/>
                         </div>)
                 }
-            </div>
-            <LinkButton onclick={()=>{
+            </div> */}
+            {/* <LinkButton onclick={()=>{
                 setSelectedActions(a=>[...a, {
                     index: a.length+2,
                     availableActionId:"",
@@ -108,18 +123,31 @@ export default function (){
                 <div className="text-2xl">
                     +
                 </div>
-            </LinkButton>
+            </LinkButton> */}
         </div>
         {selectedModalIndex && <Modal availableItems  = {selectedModalIndex == 1? availableTriggers: availableActions} index={selectedModalIndex} onSelect = {(props:null | {name:string, id:string, metadata:any})=>{
             if(props == null){
                 setSelectedModalIndex(null);
                 return;
             }
-            if(selectedModalIndex === 1){
+            if(selectedModalIndex == 1){
                 setSelectedTrigger({
                     id:props.id,
                     name:props.name,
                 })
+                setNodes((nds) =>
+                    nds.map((node) =>
+                        node.id === selectedModalIndex.toString()
+                            ? {
+                                ...node,
+                                data: {
+                                    ...node.data,
+                                    name: props.name,
+                                },
+                            }
+                            : node
+                    )
+                );
                 setSelectedModalIndex(null)
             }
             else{
@@ -134,6 +162,20 @@ export default function (){
                     setSelectedModalIndex(null)
                     return newActions
                 })
+                
+                setNodes((nds) =>
+                    nds.map((node) =>
+                        node.id === selectedModalIndex.toString()
+                            ? {
+                                ...node,
+                                data: {
+                                    ...node.data,
+                                    name: props.name,
+                                },
+                            }
+                            : node
+                    )
+                );
             }
         }}/>}
     </div>
@@ -152,8 +194,7 @@ function Modal({index, onSelect, availableItems}:{index:number, onSelect:(props:
         name: string
     }>();
 
-    const isTrigger = index === 1;
-
+    const isTrigger = index == 1;
 
     return <div>
         <Dialog open={true} onOpenChange={()=>onSelect(null)}>

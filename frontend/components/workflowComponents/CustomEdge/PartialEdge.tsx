@@ -4,9 +4,8 @@ import { Plus } from 'lucide-react';
 import React from 'react';
 import { EdgeProps } from 'reactflow';
 
-const MainEdge = (props: EdgeProps & { setNodes: any, setEdges: any, nodes: Node[], edges: Edge[] }) => {
+const PartialEdge = (props: EdgeProps & { setNodes: any, setEdges: any, nodes: Node[], edges: Edge[] }) => {
     const { id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, setNodes, setEdges, nodes, edges, source, target } = props;
-
 
     const [edgePath, labelX, labelY] = getBezierPath({
         sourceX,
@@ -20,66 +19,33 @@ const MainEdge = (props: EdgeProps & { setNodes: any, setEdges: any, nodes: Node
     const handlePlusClick = () => {
         const newNodeId = `${nodes.length + 1}`;
         
-        const targetNode = nodes.find((node) => node.id === target);
+        const targetNode = nodes[nodes.length - 1];
         if (!targetNode) return; 
 
         const targetIndex = targetNode.data.index;
 
-        const lastNodeId = edges.find(e=>e.type ==='customPartialEdge')?.target
-        
+
+       
         const newNode = {
             id: newNodeId,
             type: 'Action',
             data: {
                 name: 'New Action',
-                index: targetIndex, 
+                //@ts-ignore
+                index: targetIndex + 1, 
                 metadata: {},
             },
             position: {
                 x: (sourceX/3), 
-                y: (sourceY + targetY) / 2 + 100, 
+                y: (2 * sourceY) / 2 + 100, 
             },
         };
         
         
-        setNodes((prevNodes: Node[]) => {
-            
-            return prevNodes.map((node) => {
-                if (node.id === target) {
-                    
-                    return {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            //@ts-ignore
-                            index: node.data.index + 1, 
-                        },
-                        position: {
-                            ...node.position,
-                            y: node.position.y + 300,
-                        },
-                    };
-                    //@ts-ignore
-                } else if (node.data.index > targetIndex) {
-                    return {
-                        ...node,
-                        data:{
-                            ...node.data,
-                            //@ts-ignore
-                            index: node.data.index + 1,
-                        },
-                        position: {
-                            ...node.position,
-                            y: node.position.y + 300,
-                        },
-                    };
-                }
-                return node;
-            }).concat(newNode); 
-        });
-        
+        setNodes((prevNodes:Node[])=>[...prevNodes, newNode])
+
         setEdges((prevEdges: Edge[]) => [
-            ...prevEdges.filter((edge) => edge.id !== id && edge.type !== 'customPartialEdge'), 
+            ...prevEdges.filter((edge) => edge.id !== id),
             {
                 id: `${source}-${newNodeId}`,  
                 source: source,
@@ -88,16 +54,10 @@ const MainEdge = (props: EdgeProps & { setNodes: any, setEdges: any, nodes: Node
                 animated: true,
             },
             {
-                id: `${newNodeId}-${target}`, 
+                id: `${newNodeId}-${newNodeId}`, 
                 source: newNodeId,
-                target: target,
-                type: 'mainEdge',
-                animated: true,
-            },{
-                id: `${nodes.length}`, 
-                source: lastNodeId,
-                target: lastNodeId,
-                type: 'customPartialEdge',
+                target: newNodeId,
+                type: 'partialEdge',
                 animated: true,
             }
         ]);
@@ -109,7 +69,7 @@ const MainEdge = (props: EdgeProps & { setNodes: any, setEdges: any, nodes: Node
                 <div
                     className="absolute h-9 w-1 bg-gradient-to-b from-indigo-300 via-indigo-500 to-indigo-700"
                     style={{
-                        transform: `translate(-50%,-50%) translate(${labelX}px, ${labelY - 44}px)`,
+                        transform: `translate(-50%,-50%) translate(${labelX}px, ${labelY + 80}px)`,
                     }}
                 ></div>
 
@@ -117,7 +77,7 @@ const MainEdge = (props: EdgeProps & { setNodes: any, setEdges: any, nodes: Node
                     <div
                         className="absolute hover:bg-purple_used text-purple_used hover:text-white cursor-pointer transition-all duration-500 rounded-full pointer-events-auto"
                         style={{
-                            transform: `translate(-50%,-50%) translate(${labelX}px, ${labelY}px)`,
+                            transform: `translate(-50%,-50%) translate(${labelX}px, ${labelY + 120}px)`,
                         }}
                     >
                         <Plus size={30} />
@@ -125,23 +85,23 @@ const MainEdge = (props: EdgeProps & { setNodes: any, setEdges: any, nodes: Node
                     <div
                         className="absolute bg-gray-800 text-white rounded-full px-3 py-2 font-bold opacity-0 group-hover:opacity-100"
                         style={{
-                            transform: `translate(-50%,-50%) translate(${labelX + 90}px, ${labelY}px)`,
+                            transform: `translate(-50%,-50%) translate(${labelX + 90}px, ${labelY + 90}px)`,
                         }}
                     >
                         ADD STEPS
                     </div>
                 </div>
 
-                <div
+                {/* <div
                     className="h-9 w-1 bg-gradient-to-t from-indigo-300 via-indigo-500 to-indigo-700 absolute"
                     style={{
                         transform: `translate(-50%,-50%) translate(${labelX}px, ${labelY + 44}px)`,
                     }}
-                ></div>
+                ></div> */}
             </EdgeLabelRenderer>
         </>
     );
 };
 
 
-export default MainEdge;
+export default PartialEdge;

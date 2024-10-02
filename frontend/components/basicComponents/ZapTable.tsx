@@ -80,6 +80,5 @@ export function ZapTable({zaps}:{zaps:Zap[]}){
                         }
                     </TableBody>
                 </Table>
-
     </div>
 }

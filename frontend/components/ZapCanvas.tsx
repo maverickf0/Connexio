@@ -2,31 +2,63 @@
 
 import MainEdge from '@/components/workflowComponents/CustomEdge/MainEdge';
 import * as Node from '@/components/workflowComponents/CustomNodes/Trigger';
-import { initialEdges, initialNodes } from '@/components/workflowComponents/utils/Workflow.constants';
-import { Background, Connection, Controls, Position, ReactFlow, addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
+import { Background, Connection, Controls, EdgeProps, NodeProps, Position, ReactFlow, ReactFlowProvider, addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import PartialEdge from './workflowComponents/CustomEdge/PartialEdge';
 
 export default function ({
     name,
-    index
+    onClick,
+    index,
+    setNodes,
+    setEdges,
+    nodes,
+    edges,
+    setSelectedModalIndex,
+    selectedActions,
+    selectedTrigger
 }:{ 
     name?:string,
-    index:number
+    onClick:()=>void;
+    index:number;
+    setNodes: React.Dispatch<React.SetStateAction<any>>;
+    setEdges: React.Dispatch<React.SetStateAction<any>>;
+    nodes:any;
+    edges:any;
+    setSelectedModalIndex: React.Dispatch<React.SetStateAction<number | null>>
+    selectedActions:{
+    index: number,
+    availableActionId: string,
+    availableActionName:string,
+    metadata:{}
+    }[]
+    selectedTrigger:{
+        id:string,
+        name:string
+    } | undefined
 }){ 
 
-    const [selectedTrigger, setSelectedTrigger] = useState("");
-    const [selectedActions, setSelectedActions] = useState<{
-        availableActionId:string,
-        availableActionName: string,
-    }[]>([]);
+    // const [nodes, setNodes] = useState(initialNodes)
+
+    // const [edges, setEdges] = useState(initialEdges)
+
+    function handleNodeClick (event:React.MouseEvent, node:any){
+        if(node.type === 'Trigger'){
+            
+            setSelectedModalIndex(parseInt(node.id))
+            node.data.name = selectedTrigger?.name;
+        }
+        else{
+            const action = selectedActions.find(a=>a.index == node.id)
+            node.data.name = action?.availableActionName
+            setSelectedModalIndex(parseInt(node.id))
+        }
+    } 
 
 
-    const [nodes, setNodes] = useState(initialNodes)
 
-    const [edges, setEdges] = useState(initialEdges)
-
-    const onNodeChange = useCallback((changes:any)=>setNodes((Nds)=>applyNodeChanges(changes,Nds)),[])
+    const onNodeChange = useCallback((changes:any)=>setNodes((Nds:any)=>applyNodeChanges(changes,Nds)),[])
 
     const onEdgeChange = useCallback((changes:any)=>{setEdges((eds:any)=>applyEdgeChanges(changes,eds))},[])
 
@@ -36,20 +68,23 @@ export default function ({
     },[])
 
     const nodeTypes = {
-        'Trigger':(props:any)=><Node.Trigger {...props} name={name} index={index} /> ,
-        'Actions':(props:any) => <Node.Action {...props} name={name} index={index}/>
+        'Trigger':(props:any)=><Node.Trigger {...props} name={name} index={index} onClick={()=>{}} /> ,
+        'Action':(props:any) => <Node.Action {...props} name={name} index={index} onClick={()=>{}}/>
     }
 
     const edgeTypes = {
-        'mainEdge': (props:any)=><MainEdge {...props} setNodes={setNodes} setEdges={setEdges} nodes={nodes} edges={edges}/>
+        'mainEdge': (props:any)=><MainEdge {...props} setNodes={setNodes} setEdges={setEdges} nodes={nodes} edges={edges}/>,
+        'customPartialEdge': (props:any)=><PartialEdge {...props} setNodes={setNodes} setEdges={setEdges} nodes={nodes} edges={edges}/>
     }
 
     return <div className="flex w-full h-screen bg-slate-200 flex-col justify-center">
+        <ReactFlowProvider>
         <ReactFlow 
             nodes={nodes} 
             edges={edges}
             onNodesChange={onNodeChange}
             onEdgesChange={onEdgeChange}
+            onNodeClick={handleNodeClick}
             nodesDraggable={false}
             nodesConnectable={false}
             onConnect={onConnect}
@@ -66,5 +101,6 @@ export default function ({
             <Background/>
             <Controls/>
         </ReactFlow>
+        </ReactFlowProvider>
     </div>
 }

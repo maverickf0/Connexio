@@ -61,7 +61,6 @@ export default function (){
                                 password:password,
                                 name
                             })
-                            console.log(res)
                             
                             router.push('/login')
                         }
