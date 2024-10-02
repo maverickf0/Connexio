@@ -98,32 +98,6 @@ export default function (){
                      selectedActions={selectedActions}
                      selectedTrigger={selectedTrigger}
                      />
-            {/* <div className="flex justify-center w-full">
-                <ZapCell onClick={()=>{
-                    setSelectedModalIndex(1);
-                     }} name= {selectedTrigger? selectedTrigger.name: "Trigger"} index= {1}/>
-            </div>
-            <div className="flex justify-center w-full pt-2 pb-2 flex-col items-center">
-                {
-                    selectedActions?.map((action, index) =><div className="pt-2" key={action.index} onClick={()=>setSelectedModalIndex(action.index)}>
-                        <ZapCell onClick={()=>{
-                            setSelectedModalIndex(action.index);
-                            }} name= {action.availableActionName? action.availableActionName: "Action"} index= {action.index}/>
-                        </div>)
-                }
-            </div> */}
-            {/* <LinkButton onclick={()=>{
-                setSelectedActions(a=>[...a, {
-                    index: a.length+2,
-                    availableActionId:"",
-                    availableActionName:"",
-                    metadata: {}
-                }])
-            }}>
-                <div className="text-2xl">
-                    +
-                </div>
-            </LinkButton> */}
         </div>
         {selectedModalIndex && <Modal availableItems  = {selectedModalIndex == 1? availableTriggers: availableActions} index={selectedModalIndex} onSelect = {(props:null | {name:string, id:string, metadata:any})=>{
             if(props == null){
@@ -198,7 +172,6 @@ function Modal({index, onSelect, availableItems}:{index:number, onSelect:(props:
 
     return <div>
         <Dialog open={true} onOpenChange={()=>onSelect(null)}>
-            {/* <DialogTrigger>Open</DialogTrigger> */}
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Select { index == 1? "Trigger" : "Action" }</DialogTitle>
